@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="math">
+      <UniqueIdentifier>{41502e3d-6832-4180-a2a8-40944246ab83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="containers">
+      <UniqueIdentifier>{f658da18-df58-4133-bf52-0f33a276d472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{4a31183f-75b1-4fd4-8ff4-c914f32327ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory">
+      <UniqueIdentifier>{771dec2b-6026-4b63-b947-77d3fc3d9de1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="natvis">
+      <UniqueIdentifier>{baede094-0a19-44e9-976a-94606feb3b08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="objectmodel">
+      <UniqueIdentifier>{ae62cc15-5962-4c42-b68e-1a94582d8a7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interface">
+      <UniqueIdentifier>{3de45dda-4042-44e4-84a9-9c625bca3732}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="serialization">
+      <UniqueIdentifier>{807dc931-6b37-4c0f-9b1f-b9f04a2405f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="remoteprotocol">
+      <UniqueIdentifier>{21bdb8c9-0bb4-48c1-9efe-64ed076b59ab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="math\quaternion.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector3.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\utils.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\hash64.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\fixed_precision.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="containers\array.h">
+      <Filter>containers</Filter>
+    </ClInclude>
+    <ClInclude Include="util\assert.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\namespace.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\default_allocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="objectmodel\managed_object.h">
+      <Filter>objectmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="objectmodel\object.h">
+      <Filter>objectmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="objectmodel\object_manager.h">
+      <Filter>objectmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="objectmodel\object_id.h">
+      <Filter>objectmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\pointers.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="containers\singleton.h">
+      <Filter>containers</Filter>
+    </ClInclude>
+    <ClInclude Include="interface\engine_interface.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="serialization.h">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="remoteprotocol\object_wrapper.h">
+      <Filter>remoteprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="containers\string.h">
+      <Filter>containers</Filter>
+    </ClInclude>
+    <ClInclude Include="objectmodel\reference.h">
+      <Filter>objectmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="serialization\object_serializer.h">
+      <Filter>serialization</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="natvis\animcore.natvis">
+      <Filter>natvis</Filter>
+    </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="objectmodel\object_id.cpp">
+      <Filter>objectmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="objectmodel\managed_object.cpp">
+      <Filter>objectmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="interface\engine_inteface.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="serialization\object_serializer.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

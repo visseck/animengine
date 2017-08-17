@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="types.h" />
+    <ClInclude Include="namespace.h" />
+    <ClInclude Include="opaque_handle.h" />
+    <ClInclude Include="guid.h" />
+    <ClInclude Include="i_array_interface.h" />
+    <ClInclude Include="commands\core_commands.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\editor_commands.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="interfaces\i_engine_interface.h">
+      <Filter>interfaces</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="commands">
+      <UniqueIdentifier>{e45cfe21-ca59-4f14-ac4e-b6c8e87120dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interfaces">
+      <UniqueIdentifier>{9b8277ac-82d1-4919-b24a-4aa5fc6a32d4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="guid.cpp" />
+  </ItemGroup>
+</Project>
