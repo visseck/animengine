@@ -1,3 +1,4 @@
+#pragma once
 #include "animcore/util/namespace.h"
 #include <memory>
 #include <atomic>
@@ -47,7 +48,7 @@ public:
 		, m_ControlBlock(nullptr)
 	{}
 
-	constexpr SharedPtr(nullptr_t)
+	constexpr SharedPtr(std::nullptr_t)
 		: SharedPtr()
 	{}
 
@@ -356,7 +357,7 @@ public:
 	{
 	}
 
-	constexpr UniquePtr(nullptr_t)
+	constexpr UniquePtr(std::nullptr_t)
 		: UniquePtr()
 	{
 	}
@@ -407,7 +408,7 @@ public:
 	T* operator->() { return m_Object; }
 	const T* operator->() const { return m_Object; }
 	T* Get() { return m_Object; }
-	const T* Get() { return m_Object; }
+	const T* Get() const { return m_Object; }
 
 	T* Release()
 	{

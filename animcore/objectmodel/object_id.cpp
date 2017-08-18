@@ -1,8 +1,11 @@
 #include "object_id.h"
 #include <stdint.h>
-
+#include <string.h>
+#include "animcore/math/hash64.h"
+#ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <objbase.h>
+#endif
 
 ANIM_NAMESPACE_BEGIN
 
@@ -23,14 +26,16 @@ bool ObjectID::isValid() const
 
 ObjectID ObjectID::CreateNewGuid()
 {
+	ObjectID guid;
+#ifdef WIN32
 	GUID winGuid;
 	CoCreateGuid(&winGuid);
 	//memcpy()
-	ObjectID guid;
 	*reinterpret_cast<unsigned long*>(guid.m_Data) = winGuid.Data1;
 	*reinterpret_cast<unsigned short*>(&guid.m_Data[4]) = winGuid.Data2;
 	*reinterpret_cast<unsigned short*>(&guid.m_Data[6]) = winGuid.Data3;
 	memcpy(&guid.m_Data[8], winGuid.Data4, 8);
+#endif
 	return guid;
 }
 
@@ -62,6 +67,11 @@ bool ObjectID::operator>=(const ObjectID& other) const
 bool ObjectID::operator<=(const ObjectID& other) const
 {
 	return !(*this > other);
+}
+
+uint64_t ObjectID::GetHash() const
+{
+	return HashUtils::Compute(m_Data, sizeof(m_Data));
 }
 
 ANIM_NAMESPACE_END

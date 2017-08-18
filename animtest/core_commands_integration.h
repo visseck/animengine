@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdio>
 
-void* Allocate(size_t size);
+void* Allocate(std::size_t size);
 void Free(void* mem);

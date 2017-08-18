@@ -65,7 +65,7 @@ namespace Serialization
 			else if (t.is_enumeration())
 			{
 				bool ok = false;
-				auto result = var.to_string(&ok);
+				SimpleString result = var.to_string(&ok).c_str();
 				SerializeHelper<decltype(result)>::Apply(result, res);
 				return true;
 			}

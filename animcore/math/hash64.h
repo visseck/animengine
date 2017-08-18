@@ -44,13 +44,13 @@ namespace animengine
 		//------------------------------------------------------------------------------
 		uint64_t Compute(const int & value)
 		{
-			return Compute(static_cast<uint64_t>(value));
+			return Compute(&value, sizeof(value));
 		}
 
 		//------------------------------------------------------------------------------
 		uint64_t Compute(const unsigned int & value)
 		{
-			return Compute(static_cast<uint64_t>(value));
+			return Compute(&value, sizeof(value));
 		}
 
 		//------------------------------------------------------------------------------

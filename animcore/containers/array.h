@@ -3,9 +3,9 @@
 #include <type_traits>
 #include <string.h>
 #include <limits>
-#include "../animcore/util/assert.h"
-#include "../animcore/memory/default_allocator.h"
-#include "../animcore/math/utils.h"
+#include "animcore/util/assert.h"
+#include "animcore/memory/default_allocator.h"
+#include "animcore/math/utils.h"
 
 ANIM_NAMESPACE_BEGIN
 
@@ -55,57 +55,59 @@ private:
 public:
 	class Iterator : public Iterator_Base
 	{
+		typedef Iterator_Base super;
 	public:
 		Iterator()
 		{
-			m_Index = 0;
-			m_Array = nullptr;
+			super::m_Index = 0;
+			super::m_Array = nullptr;
 		}
 
 		Iterator(BaseArray* pArray, uint32_t index)
 		{
-			m_Index = index;
-			m_Array = pArray;
+			super::m_Index = index;
+			super::m_Array = pArray;
 		}
 
 		ObjectType& operator->()
 		{
-			ANIM_ASSERT(m_Array);
-			return m_Array[m_Index];
+			ANIM_ASSERT(super::m_Array);
+			return (*super::m_Array)[super::m_Index];
 		}
 
 		ObjectType& operator*()
 		{
-			ANIM_ASSERT(m_Array);
-			return (*m_Array)[m_Index];
+			ANIM_ASSERT(super::m_Array);
+			return (*super::m_Array)[super::m_Index];
 		}
 	};
 
 	class ConstIterator : public Iterator_Base
 	{
+		typedef Iterator_Base super;
 	public:
 		ConstIterator()
 		{
-			m_Index = 0;
-			m_Array = nullptr;
+			super::m_Index = 0;
+			super::m_Array = nullptr;
 		}
 
 		ConstIterator(const BaseArray* pArray, uint32_t index)
 		{
-			m_Index = index;
-			m_Array = const_cast<BaseArray*>(pArray);
+			super::m_Index = index;
+			super::m_Array = const_cast<BaseArray*>(pArray);
 		}
 
 		const ObjectType& operator->() const
 		{
-			ANIM_ASSERT(m_Array);
-			return m_Array[m_Index];
+			ANIM_ASSERT(super::m_Array);
+			return super::m_Array[super::m_Index];
 		}
 
 		const ObjectType& operator*() const
 		{
-			ANIM_ASSERT(m_Array);
-			return (*m_Array)[m_Index];
+			ANIM_ASSERT(super::m_Array);
+			return (*super::m_Array)[super::m_Index];
 		}
 	};
 
@@ -352,7 +354,7 @@ private:
 	void Reallocate(uint32_t newSize)
 	{
 		ANIM_ASSERT(newSize < std::numeric_limits<CountType>::max());
-		auto newData = newSize > 0 ? Allocator::Allocate<ObjectType>(newSize) : nullptr;
+		auto newData = Allocator::Allocate(newSize);// : nullptr;
 		if (m_Data != nullptr)
 		{
 			if (newData != nullptr)
@@ -406,13 +408,13 @@ public:
 	BaseArray& operator=(BaseArray&&) = default;
 };
 
-template<typename ObjectType, typename Allocator = DefaultAllocator>
+template<typename ObjectType, typename Allocator = DefaultAllocatorT<ObjectType>>
 using Array = BaseArray<uint16_t, ObjectType, Allocator>;
 
-template<typename ObjectType, typename Allocator = DefaultAllocator>
+template<typename ObjectType, typename Allocator = DefaultAllocatorT<ObjectType>>
 using BigArray = BaseArray<uint32_t, ObjectType, Allocator>;
 
-template<typename ObjectType, uint32_t FIXED_SIZE, typename Allocator = DefaultAllocator>
+template<typename ObjectType, uint32_t FIXED_SIZE, typename Allocator = DefaultAllocatorT<ObjectType>>
 class InplaceArray : public BaseArray<uint16_t, ObjectType, Allocator>
 {
 	typedef BaseArray<uint16_t, ObjectType, Allocator> super;

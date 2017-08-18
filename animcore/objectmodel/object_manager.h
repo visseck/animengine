@@ -1,15 +1,15 @@
 #pragma once
-#include "util/namespace.h"
+#include "animcore/util/namespace.h"
 
 #include <unordered_map>
 #include <mutex>
 
-#include "objectmodel/managed_object.h"
-#include "objectmodel/object_id.h"
-#include "memory/default_allocator.h"
-#include "memory/pointers.h"
-#include "containers/singleton.h"
-#include "util/assert.h"
+#include "animcore/objectmodel/managed_object.h"
+#include "animcore/objectmodel/object_id.h"
+#include "animcore/memory/default_allocator.h"
+#include "animcore/memory/pointers.h"
+#include "animcore/containers/singleton.h"
+#include "animcore/util/assert.h"
 #include "animcore/objectmodel/reference.h"
 
 ANIM_NAMESPACE_BEGIN

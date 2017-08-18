@@ -1,5 +1,6 @@
 #pragma once
 #include "animpublic/namespace.h"
+#include <cstdio>
 
 ANIM_PUBLIC_NAMESPACE_BEGIN
 

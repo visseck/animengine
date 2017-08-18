@@ -43,6 +43,22 @@ public:
 };
 
 template<typename T>
+class DefaultAllocatorT
+{
+	public:
+	static T* Allocate(size_t numElements = 1)
+	{
+		return DefaultAllocator::Allocate<T>(numElements);
+	}
+
+	static void Free(void* data)
+	{
+		DefaultAllocator::Free(data);
+	}
+
+};
+
+template<typename T>
 class DefaultSTDAllocator
 {
 public:
