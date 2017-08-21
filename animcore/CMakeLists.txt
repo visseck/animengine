@@ -42,6 +42,11 @@ set ( OBJECT_MODEL_SRCS
 
 set( REMOTE_PROTOCOL_SRCS
     remoteprotocol/object_wrapper.h
+	remoteprotocol/pipe_server.h
+	remoteprotocol/pipe_server.cpp
+	remoteprotocol/pipe_client.h
+	remoteprotocol/pipe_client.cpp
+	remoteprotocol/message.h
 )
 
 set( SERIALIZATION_SRCS
