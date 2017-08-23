@@ -1,16 +1,13 @@
 #pragma once
 #include "animcore/util/namespace.h"
-
-#include <unordered_map>
 #include <mutex>
 
-#include "animcore/objectmodel/managed_object.h"
 #include "animcore/objectmodel/object_id.h"
 #include "animcore/memory/default_allocator.h"
 #include "animcore/memory/pointers.h"
 #include "animcore/containers/singleton.h"
+#include "animcore/containers/unordered_map.h"
 #include "animcore/util/assert.h"
-#include "animcore/objectmodel/reference.h"
 
 ANIM_NAMESPACE_BEGIN
 
@@ -33,7 +30,8 @@ public:
 		m_ObjectMap[objectID] = ptr;
 	}
 
-	void UnregisterManagedObject(ManagedObject* object)
+	template<typename T>
+	void UnregisterManagedObject(T* object)
 	{
 		ANIM_ASSERT_SLOW(m_ObjectMap.find(object->GetObjectID()) != m_ObjectMap.end());
 		m_ObjectMap.erase(object->GetObjectID());
@@ -42,7 +40,7 @@ public:
 	}
 private:
 	std::mutex m_ObjectMapMutex;
-	std::unordered_map<ObjectID, SharedPtr<ManagedObject>> m_ObjectMap;
+	UnorderedMap<ObjectID, SharedPtr<ManagedObject>> m_ObjectMap;
 };
 
 

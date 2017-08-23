@@ -3,12 +3,7 @@
 
 ANIM_NAMESPACE_BEGIN
 
-RTTR_REGISTRATION
-{
-	using namespace rttr;
-	registration::class_<ManagedObject>("ManagedObject")
-	.constructor()
-	.property_readonly("ObjectID", &ManagedObject::GetObjectID);
-}
+IMPLEMENT_CONCRETE_DERIVED_CLASS(ManagedObject, Object);
+
 
 ANIM_NAMESPACE_END

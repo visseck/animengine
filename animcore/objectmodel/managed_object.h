@@ -7,6 +7,7 @@ ANIM_NAMESPACE_BEGIN
 class ObjectManager;
 class ManagedObject : public Object
 {
+	DECLARE_DERIVED_CLASS();
 	typedef Object super;
 #ifndef EDITOR_AVAILABLE
 public:
@@ -21,7 +22,6 @@ private:
 	void SetObjectID(const ObjectID& obj) { super::SetObjectID(obj); }
 #endif
 	friend class ObjectManager;
-	RTTR_ENABLE();
 };
 
 ANIM_NAMESPACE_END

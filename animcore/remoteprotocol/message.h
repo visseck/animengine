@@ -6,6 +6,7 @@ ANIM_NAMESPACE_BEGIN
 
 class Message : public Object
 {
+	DECLARE_DERIVED_CLASS();
 public:
 	virtual ~Message() {}
 };

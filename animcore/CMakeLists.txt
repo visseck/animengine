@@ -10,6 +10,7 @@ set( CONTAINER_SRCS
     containers/array.h
     containers/singleton.h
     containers/string.h
+	containers/unordered_map.h
 )
 
 set( INTERFACE_SRCS
@@ -37,6 +38,7 @@ set ( OBJECT_MODEL_SRCS
     objectmodel/object_id.h
     objectmodel/object_manager.h
     objectmodel/object.h
+	objectmodel/object.cpp
     objectmodel/reference.h
 )
 
@@ -47,12 +49,15 @@ set( REMOTE_PROTOCOL_SRCS
 	remoteprotocol/pipe_client.h
 	remoteprotocol/pipe_client.cpp
 	remoteprotocol/message.h
+	remoteprotocol/message.cpp
 )
 
 set( SERIALIZATION_SRCS
     serialization/object_serializer.cpp
     serialization/object_serializer.h
     serialization/serialization.h
+	serialization/i_serializable.h
+	serialization/reflection.h
 )
 
 set( UTIL_SRCS

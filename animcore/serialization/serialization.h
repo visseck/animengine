@@ -10,6 +10,7 @@
 #include "animcore/objectmodel/object_id.h"
 #include "animcore/objectmodel/reference.h"
 #include "animcore/objectmodel/object_manager.h"
+#include "animcore/serialization/reflection.h"
 
 
 ANIM_NAMESPACE_BEGIN
@@ -19,6 +20,39 @@ namespace Serialization
 	class Serializer;
 	class Deserializer;
 	static constexpr uint32_t SerializationFormatVersion = 1;
+	
+	class IReadStream
+	{
+	public:
+		virtual void Read(void * dst, uint32_t numBytes) = 0;
+		virtual void Reset() = 0;
+		virtual uint32_t GetNumBytesRead() const = 0;
+	};
+
+	class IWriteStream
+	{
+	public:
+		virtual void Write(const void * data, uint32_t numBytes) = 0;
+		virtual void Reserve(uint32_t numBytes) = 0;
+		virtual void Reset() = 0;
+		virtual uint32_t GetNumBytesWritten() const = 0;
+	};
+
+	namespace ImplDetails
+	{
+		class SizeAccumulator : public IWriteStream
+		{
+		public:
+			SizeAccumulator() : m_CurSize(0) {}
+			virtual void Write(const void *, uint32_t numBytes) override { m_CurSize += numBytes; }
+			virtual void Reserve(uint32_t) override {}
+			virtual void Reset() override { m_CurSize = 0; }
+			virtual uint32_t GetNumBytesWritten() const override { return m_CurSize; }
+		private:
+			uint32_t m_CurSize;
+		};
+	}
+
 
 	namespace ImplDetails
 	{
@@ -31,26 +65,75 @@ namespace Serialization
 	class Serializer
 	{
 	public:
-		template<typename T>
-		void Serialize(const T& obj);
-		void Serialize(uint32_t size, const void* data);
+		Serializer(IWriteStream & stream, uint32_t version)
+			: m_Stream(stream), m_RecursiveCount(0), m_Version(version)
+		{
+			m_Stream.Write(
+				reinterpret_cast<const uint8_t *>(&SerializationFormatVersion), 
+				sizeof(SerializationFormatVersion));
+			m_Stream.Write(
+				reinterpret_cast<uint8_t *>(&version), 
+				sizeof(version));
+		}
+		Serializer(const Serializer &) = delete;
+		Serializer & operator=(const Serializer &) = delete;
+
+		template <typename T>
+		typename std::enable_if<!std::is_pointer<T>::value, void>::type Serialize(const T & obj);
+
+		template <typename T>
+		void Serialize(T * obj);
+
+		inline void Serialize(const void * src, uint32_t numBytes);
+		uint32_t GetVersion() const { return m_Version; }
+	private:
+		uint32_t m_Version;
+		template <typename T>
+		inline typename std::enable_if<!std::is_pointer<T>::value, uint32_t>::type GetSize(const T & obj) const;
+		template <typename T>
+		inline uint32_t GetSize(T * obj) const;
+
 	private:
 		template <typename T, class Enable>
 		friend struct ImplDetails::SerializeHelper;
+		IWriteStream & m_Stream;
+		uint16_t m_RecursiveCount;
 	};
 
 	class Deserializer
 	{
 	public:
-		template<typename T>
-		inline T* FactoryObject();
+		Deserializer(IReadStream & stream) 
+			: m_Stream(stream)
+			, m_IsValid(false)
+		{
+			uint32_t serializationVersion;
+			m_Stream.Read(reinterpret_cast<uint8_t *>(&serializationVersion), sizeof(serializationVersion));
+			if (serializationVersion == SerializationFormatVersion)
+			{
+				m_IsValid = true;
+				m_Stream.Read(reinterpret_cast<uint8_t *>(&m_Version), sizeof(m_Version));
+			}
+		}
+		Deserializer(const Deserializer &) = delete;
+		Deserializer & operator=(const Deserializer &) = delete;
 
-		template<typename T>
-		void Deserialize(T& obj);
-		void Deserialize(void* data, uint32_t size);
+
+		inline bool IsValid() const { return m_IsValid; }
+		template <typename T>
+		inline void Deserialize(T & obj);
+		inline void Deserialize(void * dst, uint32_t numBytes);
+
+		uint32_t GetDataVersion() const { return m_Version; }
 	private:
-		template<typename T, class Enable>
+		template <typename T>
+		inline T * FactoryObject();
+
+		IReadStream & m_Stream;
+		template <typename T, class Enable>
 		friend struct ImplDetails::DeserializeHelper;
+		uint32_t m_Version;
+		bool m_IsValid;
 	};
 
 	namespace ImplDetails
@@ -61,14 +144,7 @@ namespace Serialization
 		{
 			static void Apply(const T & obj, Serializer & res)
 			{
-				using namespace rttr;
-				static_assert(std::is_base_of<Object, T>::value, "TRYING TO SERIALIZE AN OBJECT OF UNKNOWN TYPE(DERIVE FROM Object)");
-				type objType = type::get<T>(); 
-				auto props = objType.get_properties();
-				for (auto& prop : props)
-				{
-//					prop.
-				}
+				static_assert(std::is_same<T, T>::value, "TRYING TO SERIALIZE AN OBJECT OF UNKNOWN TYPE(DERIVE FROM Object)");
 			}
 		};
 		template <typename T, typename Enable>
@@ -76,8 +152,7 @@ namespace Serialization
 		{
 			static void Apply(Deserializer & res, T & obj)
 			{
-				static_assert(std::is_base_of<Object, T>::value, "TRYING TO DESERIALIZE AN UNKNOWN OBJECT.DERIVE FROM Object");
-				DeserializeHelper<Object>::Apply(obj, res);
+				static_assert(std::is_same<T, T>::value, "TRYING TO SERIALIZE AN OBJECT OF UNKNOWN TYPE(DERIVE FROM Object)");
 			}
 		};
 #pragma endregion defaultfail
@@ -90,7 +165,7 @@ namespace Serialization
 		{
 			static void Apply(const T & obj, Serializer & res)
 			{
-				res.Serialize(sizeof(T), reinterpret_cast<const uint8_t *>(&obj));
+				res.Serialize(&obj, sizeof(T));
 			}
 		};
 		template <typename T>
@@ -178,22 +253,79 @@ namespace Serialization
 		};
 #pragma endregion voidstar
 
+#pragma region ISerializable
+		template<typename T>
+		struct SerializeHelper<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value>::type>
+		{
+			static void Apply(const ISerializable& obj, Serializer& res)
+			{
+				obj.Serialize(res);
+			}
+		};
+
+		template<typename T>
+		struct DeserializeHelper<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value>::type>
+		{
+			static void Apply(Serializer& res, ISerializable& obj)
+			{
+				obj.Deserialize(res);
+			}
+		};
+#pragma endregion ISerializable
+
+#pragma region ISerializablePtr
+		template <typename T>
+		struct SerializeHelper<T *, typename std::enable_if<std::is_base_of<ISerializable, T>::value>::type>
+		{
+			static void Apply(const ISerializable * obj, Serializer & res)
+			{
+				SerializeHelper<bool>::Apply(obj != nullptr, res);
+				if (obj != nullptr)
+				{
+					const auto & classInfo = obj->GetReflectedClassInfo();
+					ANIM_ASSERT(classInfo.GetTypeID() != 0);
+					SerializeHelper<uint64_t>::Apply(classInfo.GetTypeID(), res);
+					SerializeHelper<T>::Apply(*obj, res);
+				}
+			}
+		};
+		template <typename T>
+		struct DeserializeHelper<T *, typename std::enable_if<std::is_base_of<ISerializable, T>::value>::type>
+		{
+			static void Apply(Deserializer & res, T *& obj)
+			{
+				ANIM_ASSERT(obj == nullptr);
+				bool hasObject = false;
+				DeserializeHelper<bool>::Apply(res, hasObject);
+				if (hasObject)
+				{
+					uint64_t typeID = 0;
+					DeserializeHelper<uint64_t>::Apply(res, typeID);
+					ANIM_ASSERT(typeID != 0);
+					obj = Reflection::TypeRegistry::FactoryClass<T>(typeID);
+					ANIM_ASSERT(obj != nullptr);
+					DeserializeHelper<T>::Apply(res, *obj);
+				}
+			}
+		};
+#pragma endregion ISerializablePtr
+
 #pragma region TPtr
 		template<typename T>
-		struct SerializeHelper<T*>
+		struct SerializeHelper<T*, typename std::enable_if<!std::is_base_of<ISerializable, T>::value>::type>
 		{
 			static void Apply(const T* obj, Serializer& res)
 			{
 				SerializeHelper<bool>::Apply(obj != nullptr, res);
 				if (obj != nullptr)
-				{					
+				{
 					SerializeHelper<T>::Apply(*obj, res);
 				}
 			}
 		};
 
 		template<typename T>
-		struct DeserializeHelper<T*>
+		struct DeserializeHelper<T*, typename std::enable_if<!std::is_base_of<ISerializable, T>::value>::type>
 		{
 			static void Apply(Deserializer& res, T*& obj)
 			{
@@ -218,8 +350,7 @@ namespace Serialization
 			{
 				uint32_t strLen = static_cast<uint32_t>(obj.length());
 				SerializeHelper<uint32_t>::Apply(strLen, res);
-				res.Serialize(strLen, obj.c_str());
-
+				res.Serialize(reinterpret_cast<const uint8_t*>(obj.c_str()), strLen);
 			}
 		};
 
@@ -292,7 +423,7 @@ namespace Serialization
 		{
 			static void Apply(const ObjectID & obj, Serializer & res)
 			{
-				res.Serialize(sizeof(obj.m_Data), obj.m_Data);
+				res.Serialize(obj.m_Data, sizeof(obj.m_Data));
 			}
 		};
 
@@ -328,6 +459,74 @@ namespace Serialization
 #pragma endregion Reference
 	}
 
+	template <typename T>
+	inline uint32_t Serializer::GetSize(T * obj) const
+	{
+		ImplDetails::SizeAccumulator acc;
+		Serializer res(acc, m_Version);
+		res.Serialize(obj);
+		return acc.GetNumBytesWritten();
+	}
+
+
+	template <typename T>
+	inline typename std::enable_if<!std::is_pointer<T>::value, uint32_t>::type Serializer::GetSize(const T & obj) const
+	{
+		ImplDetails::SizeAccumulator acc;
+		Serializer res(acc, m_Version);
+		res.Serialize(obj);
+		return acc.GetNumBytesWritten();
+	}
+
+	template <typename T>
+	typename std::enable_if<!std::is_pointer<T>::value, void>::type Serializer::Serialize(const T & obj)
+	{
+		if (m_RecursiveCount++ == 0)
+		{
+			uint32_t size = GetSize(obj);
+			m_Stream.Reserve(size);
+		}
+		ImplDetails::SerializeHelper<T>::Apply(obj, *this);
+		--m_RecursiveCount;
+	}
+
+	template <typename T>
+	void Serializer::Serialize(T * obj)
+	{
+		if (m_RecursiveCount++ == 0)
+		{
+			uint32_t size = GetSize<T>(obj);
+			m_Stream.Reserve(size);
+		}
+		ImplDetails::SerializeHelper<T *>::Apply(obj, *this);
+		--m_RecursiveCount;
+	}
+
+	inline void Serializer::Serialize(const void * src, uint32_t numBytes)
+	{
+		m_Stream.Write(src, numBytes);
+	}
+
+	template <typename T>
+	inline void Deserializer::Deserialize(T & obj)
+	{
+		if (!m_IsValid)
+			return;
+		ImplDetails::DeserializeHelper<T>::Apply(*this, obj);
+	}
+
+	inline void Deserializer::Deserialize(void * dst, uint32_t numBytes)
+	{
+		if (!m_IsValid)
+			return;
+		m_Stream.Read(dst, numBytes);
+	}
+
+	template <typename T>
+	inline T * Deserializer::FactoryObject()
+	{
+		return DefaultAllocator::Create<T>();
+	}
 }
 
 ANIM_NAMESPACE_END
